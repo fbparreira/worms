@@ -5,11 +5,18 @@ README
 
 ## Overview
 
-`worms()` is a tool based on the `worrms` package to call the [WoRMS
-Taxon match tool](https://www.marinespecies.org/aphia.php?p=match) from
-R to update and correct marine species names. This tool was created to
-support my specific workflow, thus it is highly advisable to see the
-example section.
+`worms()` is a tool based on the [worrms
+package](https://cran.r-project.org/web/packages/worrms/index.html) to
+call the [WoRMS Taxon match
+tool](https://www.marinespecies.org/aphia.php?p=match) from R to update
+and correct marine species names. This tool was created to support my
+specific workflow, thus it is highly advisable to see the example
+section for a correct application.
+
+This tool is intended to give more feedback on what is going on behind
+the scene during the process by providing informative messages as well
+as producing intentional errors. This allows the user to better identify
+the problem as well as resolve it.
 
 Don’t hesitate in contacting me directly to <fbparreira@ualg.pt> if you
 have any doubt or contribution to add.
@@ -63,10 +70,10 @@ your_results <-
 
 ## Example 2
 
-Often WoRMS will have more than one match for the same species, as is
-the case for *Gobius niger*. In this case, the `worms()` function will
-automatically produce an `Error` with the instructions on how to
-proceed.
+Often [WoRMS](https://www.marinespecies.org/index.php) will have more
+than one match for the same species name, as is the case for *Gobius
+niger*. In this case, the `worms()` function will automatically produce
+an `Error` with the instructions on how to proceed.
 
 ``` r
 species_names <- 
@@ -116,17 +123,18 @@ your_results <-
 If you are working with large datasets of marine biodiversity data to
 the species level, you know it’s not all roses. Very often perfect
 complete taxonomic identifications are not possible and it is very
-common to find in your dataset identifications with “c.f.” (to confirm)
-or “n.i.” (non identified). Naturally, these “c.f.” and “n.i.” are not
-recognized by [WoRMS](https://www.marinespecies.org/index.php) and need
-to be removed to run the tool. Thus, if you have a non-corrected *Genus
-c.f. species*, you need to remove the “c.f” to run [WoRMS Taxon match
+common to find in your dataset identifications with, among others,
+“c.f.” (to confirm) or “n.i.” (non identified). Naturally, these “c.f.”
+and “n.i.” are not recognized by
+[WoRMS](https://www.marinespecies.org/index.php) and need to be removed
+to run the tool. Thus, if you have a non-corrected *Genus c.f. species*,
+you need to remove the “c.f” to run [WoRMS Taxon match
 tool](https://www.marinespecies.org/aphia.php?p=match), but later you
 naturally need to re-include the “c.f.” into the corrected *Genus c.f.
-species*. In my workflow, not everything should be automated, and very
-often I prefer to manually correct some things to ensure everything is
-correct and no information is lost. Bellow I’ll show you how I would use
-`worms()` in a real life scenario to correct a species list.
+species*.
+
+Bellow I’ll show how I would use `worms()` in a real life scenario to
+correct a species name list.
 
 ### Example 3.1 dataset
 
@@ -158,12 +166,12 @@ head(fauna)
 ```
 
     ##   Sample                 Species Count
-    ## 1     S1            Gobius niger    60
-    ## 2     S1   Gammarus insensibilis    28
-    ## 3     S1      Bitium reticulatum     3
-    ## 4     S1        Anomia ephippium    97
-    ## 5     S1     Gibbula umbilicaris    96
-    ## 6     S1 Bitium c.f. reticulatum    27
+    ## 1     S1            Gobius niger    52
+    ## 2     S1   Gammarus insensibilis    54
+    ## 3     S1      Bitium reticulatum    94
+    ## 4     S1        Anomia ephippium    18
+    ## 5     S1     Gibbula umbilicaris    27
+    ## 6     S1 Bitium c.f. reticulatum     2
 
 ### Example 3.2 unique species list
 
@@ -177,9 +185,9 @@ etc., should be removed as well.
 - Make sure you don’t have unnecessary white spaces. You can use the
   `stringr::str_squish()` function for this.
 
-- Make sure you address all variations of “c.f.”, “n.i.” and “sp.”. One
-  might be “c.f.” and other might be “cf.”, etc.. Better to standardized
-  everything.
+- Make sure you address all variations of “c.f.”, “n.i.” and “sp.”. For
+  example, one might be “c.f.” and other might be “cf.”, etc.. Better to
+  standardized everything.
 
 - Make sure you apply the corrections of “c.f.” AFTER calling for unique
   species names. If you want to preserve those “c.f.”, “n.i.” and “sp.”.
@@ -251,10 +259,12 @@ your_results <-
 
 ### Example 3.4 unmatched results
 
-The unmatched results are misspelled species names. In this example we
-have no match found *Bitium reticulatum* and *Clibanarus erithropus*,
-which the correct names are *Bittium reticulatum* and *Clibanarius
-erythropus*, respectively.
+The unmatched results are names that the [WoRMS Taxon match
+tool](https://www.marinespecies.org/aphia.php?p=match) is unable to find
+any match, often misspelled species names. In this example we have no
+match found *Bitium reticulatum* and *Clibanarus erithropus*, which the
+correct names are *Bittium reticulatum* and *Clibanarius erythropus*,
+respectively.
 
 Also, there are 2 results for *Bittium reticulatum*. This is because one
 of them is actually *Bittium c.f. reticulatum*. This is important as you
@@ -267,9 +277,9 @@ and
 
 - `Bitium c.f. reticulatum => Bittium c.f. reticulatum`
 
-To apply these corrections you can do as follows, always making sure the
-“post worms” section is before everything. At this point the entire
-script should look like this:
+To apply these corrections you can do as follows, **always making sure
+the “post worms” section is before everything**. At this point the
+entire script should look like this:
 
 ``` r
 # Post worms
@@ -326,12 +336,12 @@ your_results <-
     ## |superseded combination |     1|
     ## |unaccepted             |     1|
 
-### Example 3.5 accept WoRMS valid name
+### Example 3.5 accept WoRMS valid names
 
 At this point, we now have 1 name that is “unaccepted” and 1 “superseded
-combination”. You should check your WoRMS results (`your_results` or
-`worms_results`) and under the “Status” column **evaluate if you want to
-address or ignore the valid name**.
+combination”. You should check your WoRMS results table (`your_results`
+or `worms_results`) and under the “Status” column **evaluate if you want
+to address or ignore the valid name**.
 
 To address it you can correct the names as in the previous section. To
 apply all corrections for this examples, your script should look like
